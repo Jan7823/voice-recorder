@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0a0e1a">
+    <title>Voice Recorder Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-dark: #0a0e1a;
+            --bg-card: #141824;
+            --bg-elevated: #1a1f2e;
+            --accent: #00f0ff;
+            --accent-secondary: #ff00ff;
+            --accent-glow: rgba(0, 240, 255, 0.5);
+            --text-primary: #ffffff;
+            --text-secondary: #8b92a7;
+            --success: #00ff88;
+            --danger: #ff3366;
+            --warning: #ffaa00;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+            animation: bgPulse 15s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(0, 240, 255, 0.03) 0px,
+                    transparent 1px,
+                    transparent 2px,
+                    rgba(0, 240, 255, 0.03) 3px
+                );
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ==================== LOGIN SCREEN ==================== */
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 32px;
+            padding: 50px 35px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 
+                0 0 60px rgba(0, 240, 255, 0.1),
+                0 20px 80px rgba(0, 0, 0, 0.6);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-secondary));
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border-radius: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 20px;
+            box-shadow: 
+                0 10px 40px var(--accent-glow),
+                0 0 60px rgba(255, 0, 255, 0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 32px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            text-align: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255, 0, 255, 0.5)); }
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 35px;
+            font-size: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input[type="password"],
+        input[type="email"],
+        input[type="text"] {
+            width: 100%;
+            padding: 16px 20px;
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input[type="password"]:focus,
+        input[type="email"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 
+                0 0 0 4px var(--accent-glow),
+                0 4px 20px rgba(0, 240, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .password-hint {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            border: none;
+            border-radius: 16px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 8px 24px var(--accent-glow),
+                0 0 40px rgba(255, 0, 255, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: rgba(255, 51, 102, 0.1);
+            border: 2px solid var(--danger);
+            color: var(--danger);
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            font-weight: 600;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: shake 0.5s, fadeIn 0.3s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-15px); }
+            75% { transform: translateX(15px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ==================== MAIN APP ==================== */
+        .app-screen {
+            display: none;
+        }
+
+        .app-screen.active {
+            display: block;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .header h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 26px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logout-btn {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            color: var(--text-secondary);
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: var(--danger);
+            border-color: var(--danger);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Recording Control */
+        .recording-control {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 28px;
+            padding: 45px 35px;
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .recording-control::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--accent-secondary), transparent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s;
+        }
+
+        .recording-control.recording::before {
+            transform: scaleX(1);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            background: rgba(139, 146, 167, 0.1);
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 25px;
+            border: 2px solid var(--border);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            box-shadow: 0 0 10px currentColor;
+        }
+
+        .recording-control.recording .status-indicator {
+            background: rgba(255, 51, 102, 0.15);
+            border-color: var(--danger);
+        }
+
+        .recording-control.recording .status-dot {
+            background: var(--danger);
+            animation: dotPulse 1.5s infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1); 
+                box-shadow: 0 0 10px var(--danger);
+            }
+            50% { 
+                opacity: 0.5; 
+                transform: scale(1.3); 
+                box-shadow: 0 0 20px var(--danger);
+            }
+        }
+
+        .record-btn {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            color: white;
+            font-size: 50px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 10px 40px var(--accent-glow),
+                0 0 60px rgba(255, 0, 255, 0.3);
+            margin: 25px auto;
+            display: block;
+            position: relative;
+        }
+
+        .record-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            opacity: 0;
+            filter: blur(10px);
+            transition: opacity 0.3s;
+        }
+
+        .record-btn:hover::before {
+            opacity: 0.7;
+        }
+
+        .record-btn:active {
+            transform: scale(0.95);
+        }
+
+        .recording-control.recording .record-btn {
+            background: var(--danger);
+            box-shadow: 
+                0 10px 40px rgba(255, 51, 102, 0.5),
+                0 0 60px rgba(255, 51, 102, 0.3);
+            animation: btnPulse 2s infinite;
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 
+                    0 10px 40px rgba(255, 51, 102, 0.5),
+                    0 0 60px rgba(255, 51, 102, 0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 
+                    0 10px 50px rgba(255, 51, 102, 0.7),
+                    0 0 80px rgba(255, 51, 102, 0.5);
+            }
+        }
+
+        .timer {
+            font-family: 'Orbitron', monospace;
+            font-size: 36px;
+            font-weight: 700;
+            margin: 20px 0;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .recording-control.recording .timer {
+            background: var(--danger);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .instructions {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+
+        /* Wake Lock Alert */
+        .wake-lock-alert {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 240, 255, 0.1));
+            border: 2px solid var(--success);
+            color: var(--success);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .wake-lock-alert.active {
+            display: block;
+        }
+
+        .wake-lock-alert::before {
+            content: '✨';
+            margin-right: 8px;
+        }
+
+        /* Transcript Section */
+        .transcript-section {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .transcript-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .transcript-header h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .word-count {
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 600;
+            padding: 6px 14px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            border: 2px solid var(--border);
+        }
+
+        .transcript-content {
+            background: var(--bg-elevated);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            min-height: 250px;
+            max-height: 450px;
+            overflow-y: auto;
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .transcript-content::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .transcript-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .transcript-content::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        .transcript-content::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        .transcript-content.empty {
+            color: var(--text-secondary);
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .interim-text {
+            color: var(--warning);
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        /* Action Buttons */
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            padding: 16px 22px;
+            border-radius: 14px;
+            border: 2px solid var(--border);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            border-color: var(--accent);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.2);
+        }
+
+        .action-btn:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--success), #00cc70);
+            border: none;
+            color: white;
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        .action-btn.primary:hover:not(:disabled) {
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Info Box */
+        .info-box {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(255, 0, 255, 0.05));
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            margin-top: 25px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: auto;
+            padding: 30px 0;
+            text-align: center;
+            border-top: 2px solid var(--border);
+        }
+
+        .footer-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .footer-text span {
+            background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--text-secondary);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .login-card {
+                padding: 40px 25px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .logo-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 36px;
+            }
+
+            .record-btn {
+                width: 120px;
+                height: 120px;
+                font-size: 44px;
+            }
+
+            .timer {
+                font-size: 30px;
+            }
+
+            .header h2 {
+                font-size: 22px;
+            }
+        }
+
+        /* Success Feedback */
+        .success-feedback {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            left: 20px;
+            background: var(--success);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+            z-index: 1000;
+            animation: slideInRight 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-card">
+            <div class="logo">
+                <div class="logo-icon">🎙️</div>
+                <h1>VOICE RECORDER</h1>
+                <p class="subtitle">Professionelle Sprachaufnahme & Transkription</p>
+            </div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">📧 E-Mail Adresse</label>
+                    <input type="email" id="email" placeholder="deine@email.de" required autocomplete="email">
+                </div>
+                <div class="input-group">
+                    <label for="password">🔐 Passwort</label>
+                    <input type="password" id="password" placeholder="Mindestens 6 Zeichen" required autocomplete="current-password">
+                    <div class="password-hint">⚡ Mindestens 6 Zeichen erforderlich</div>
+                </div>
+                <button type="submit" class="btn" id="loginBtn">Einloggen</button>
+                <div class="error-message" id="loginError"></div>
+            </form>
+            <div class="info-box">
+                <strong>🔒 Sicherheitshinweis:</strong> Dein Account wird bei Firebase registriert. Nur du hast Zugriff auf deine Transkripte!
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Screen -->
+    <div class="app-screen" id="appScreen">
+        <div class="container">
+            <div class="header">
+                <h2>🎙️ RECORDER PRO</h2>
+                <button class="logout-btn" id="logoutBtn">Abmelden</button>
+            </div>
+
+            <div class="wake-lock-alert" id="wakeLockAlert">
+                Display bleibt aktiv - Aufnahme läuft im Hintergrund
+            </div>
+
+            <div class="recording-control" id="recordingControl">
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    <span id="statusText">BEREIT</span>
+                </div>
+                <button class="record-btn" id="recordBtn">●</button>
+                <div class="timer" id="timer">00:00:00</div>
+                <p class="instructions" id="instructions">
+                    Tippe auf den Button, um die Aufnahme zu starten
+                </p>
+            </div>
+
+            <div class="transcript-section">
+                <div class="transcript-header">
+                    <h3>📝 TRANSKRIPT</h3>
+                    <span class="word-count" id="wordCount">0 WÖRTER</span>
+                </div>
+                <div class="transcript-content empty" id="transcriptContent">
+                    Dein gesprochener Text erscheint hier in Echtzeit...
+                </div>
+                <div class="actions">
+                    <button class="action-btn" id="clearBtn" disabled>
+                        🗑️ Löschen
+                    </button>
+                    <button class="action-btn primary" id="downloadBtn" disabled>
+                        📥 Download
+                    </button>
+                    <button class="action-btn" id="copyBtn" disabled>
+                        📋 Kopieren
+                    </button>
+                    <button class="action-btn" id="saveBtn" disabled>
+                        💾 Speichern
+                    </button>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <strong>💡 Pro-Tipp:</strong> Die Aufnahme läuft auch bei ausgeschaltetem Display weiter! Entsperre einfach dein Handy und beende die Aufnahme, wenn du fertig bist.
+            </div>
+
+            <div class="footer">
+                <p class="footer-text">Gecodet von <span>Jan</span> 💻✨</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ============================================
+        // FIREBASE CONFIGURATION
+        // ============================================
+        const firebaseConfig = {
+           apiKey: "AIzaSyCVGdhddTg0kGWd4y6J9uFJLZIOJOU0MOk",
+           authDomain: "voice-recorder-46c80.firebaseapp.com",
+           projectId: "voice-recorder-46c80",
+           storageBucket: "voice-recorder-46c80.firebasestorage.app",
+           messagingSenderId: "802214012529",
+           appId: "1:802214012529:web:68358372e1a2d0b2f7ddd0"
+      };
+        };
+
+        let db = null;
+        let auth = null;
+        let firebaseConfigured = false;
+        
+        try {
+            // Prüfe ob Config gesetzt wurde
+            const isConfigured = firebaseConfig.apiKey !== "DEIN_API_KEY" && 
+                                firebaseConfig.projectId !== "DEIN_PROJECT_ID";
+            
+            if (!isConfigured) {
+                console.error('❌ Firebase nicht konfiguriert!');
+                console.error('Bitte Firebase Config in Zeile 917 eintragen');
+                
+                setTimeout(() => {
+                    alert('⚠️ FIREBASE NICHT KONFIGURIERT!\n\n' +
+                          'Bitte Firebase Config in der index.html eintragen:\n\n' +
+                          '1. Firebase Console öffnen\n' +
+                          '2. Projekteinstellungen → Web-App\n' +
+                          '3. Config-Werte kopieren\n' +
+                          '4. In index.html Zeile 917 einfügen\n\n' +
+                          'Siehe SICHERE_INSTALLATION.md!');
+                }, 1000);
+            } else {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+                
+                // WICHTIG: Persistence einstellen (bleibt eingeloggt!)
+                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                    .then(() => {
+                        console.log('✅ Auth Persistence aktiviert');
+                    })
+                    .catch((error) => {
+                        console.error('Persistence error:', error);
+                    });
+                
+                firebaseConfigured = true;
+                console.log('✅ Firebase connected');
+                console.log('✅ Project ID:', firebaseConfig.projectId);
+            }
+        } catch (error) {
+            console.error('❌ Firebase initialization error:', error);
+            
+            setTimeout(() => {
+                alert('❌ FIREBASE FEHLER!\n\n' +
+                      'Fehler: ' + error.message + '\n\n' +
+                      'Siehe SICHERE_INSTALLATION.md!');
+            }, 1000);
+        }
+
+        // ============================================
+        // SPEECH RECOGNITION MANAGER (FIXED FOR MOBILE - NO DUPLICATES!)
+        // ============================================
+        class SpeechRecognitionManager {
+            constructor() {
+                this.recognition = null;
+                this.isRecording = false;
+                this.finalTranscript = '';
+                this.processedResults = new Set(); // Verhindert Duplikate!
+                this.callbacks = {};
+                
+                this.initRecognition();
+            }
+
+            initRecognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    alert('⚠️ Spracherkennung nicht unterstützt!\n\nBitte Chrome (Android) oder Safari (iOS) verwenden.');
+                    return;
+                }
+
+                this.recognition = new SpeechRecognition();
+                this.recognition.continuous = true;
+                this.recognition.interimResults = true;
+                this.recognition.lang = 'de-DE';
+
+                this.recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    
+                    // Verarbeite nur finale Ergebnisse ab dem letzten Index
+                    for (let i = 0; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        const resultId = `${event.resultIndex}-${i}`;
+                        
+                        if (result.isFinal) {
+                            // Prüfe ob schon verarbeitet
+                            if (!this.processedResults.has(resultId)) {
+                                const transcript = result[0].transcript.trim();
+                                
+                                // Füge Leerzeichen hinzu wenn nötig
+                                if (this.finalTranscript && !this.finalTranscript.endsWith(' ')) {
+                                    this.finalTranscript += ' ';
+                                }
+                                
+                                this.finalTranscript += transcript;
+                                this.processedResults.add(resultId);
+                                
+                                console.log('✅ Neu:', transcript);
+                                
+                                if (this.callbacks.onFinalResult) {
+                                    this.callbacks.onFinalResult(this.finalTranscript);
+                                }
+                            }
+                        } else {
+                            // Vorläufige Ergebnisse
+                            interimTranscript += result[0].transcript;
+                        }
+                    }
+                    
+                    if (interimTranscript && this.callbacks.onInterimResult) {
+                        this.callbacks.onInterimResult(interimTranscript);
+                    }
+                };
+
+                this.recognition.onerror = (event) => {
+                    console.error('Speech error:', event.error);
+                    
+                    if (event.error === 'no-speech') {
+                        if (this.isRecording) {
+                            setTimeout(() => this.restartRecognition(), 500);
+                        }
+                    }
+                };
+
+                this.recognition.onend = () => {
+                    console.log('🔄 Recognition ended');
+                    if (this.isRecording) {
+                        setTimeout(() => this.restartRecognition(), 300);
+                    }
+                };
+
+                this.recognition.onstart = () => {
+                    console.log('🎤 Recognition started');
+                };
+            }
+
+            restartRecognition() {
+                if (!this.isRecording) return;
+                
+                try {
+                    this.recognition.start();
+                } catch (e) {
+                    // Ignoriere "already started" Fehler
+                }
+            }
+
+            start() {
+                if (!this.recognition) {
+                    alert('⚠️ Spracherkennung nicht verfügbar!');
+                    return false;
+                }
+
+                try {
+                    this.isRecording = true;
+                    this.finalTranscript = '';
+                    this.processedResults.clear(); // Reset!
+                    this.recognition.start();
+                    console.log('🎙️ Aufnahme gestartet');
+                    return true;
+                } catch (e) {
+                    console.error('Start error:', e);
+                    this.isRecording = false;
+                    return false;
+                }
+            }
+
+            stop() {
+                this.isRecording = false;
+                if (this.recognition) {
+                    try {
+                        this.recognition.stop();
+                        console.log('⏹ Aufnahme gestoppt');
+                    } catch (e) {
+                        // Ignoriere Fehler
+                    }
+                }
+            }
+
+            getTranscript() {
+                return this.finalTranscript.trim();
+            }
+
+            clearTranscript() {
+                this.finalTranscript = '';
+                this.processedResults.clear();
+            }
+
+            on(event, callback) {
+                this.callbacks[event] = callback;
+            }
+
+            // Formatiere Text mit Groß-/Kleinschreibung und Satzzeichen
+            formatText(text) {
+                if (!text) return '';
+                
+                // Entferne mehrfache Leerzeichen
+                text = text.replace(/\s+/g, ' ').trim();
+                
+                // Erster Buchstabe groß
+                text = text.charAt(0).toUpperCase() + text.slice(1);
+                
+                // Nach Punkt, Fragezeichen, Ausrufezeichen groß schreiben
+                text = text.replace(/([.!?]\s+)(\w)/g, (match, punctuation, letter) => {
+                    return punctuation + letter.toUpperCase();
+                });
+                
+                // Füge Punkt am Ende hinzu wenn fehlt
+                if (!text.match(/[.!?]$/)) {
+                    text += '.';
+                }
+                
+                return text;
+            }
+        }
+
+        // ============================================
+        // WAKE LOCK MANAGER (FIXED - WORKS WITH SCREEN OFF!)
+        // ============================================
+        class WakeLockManager {
+            constructor() {
+                this.wakeLock = null;
+                this.isSupported = 'wakeLock' in navigator;
+                this.isActive = false;
+                
+                // Re-acquire wake lock when screen is turned back on
+                document.addEventListener('visibilitychange', async () => {
+                    if (this.isActive && !document.hidden && !this.wakeLock) {
+                        console.log('🔄 Re-acquiring wake lock...');
+                        await this.request();
+                    }
+                });
+            }
+
+            async request() {
+                if (!this.isSupported) {
+                    console.warn('⚠️ Wake Lock nicht unterstützt');
+                    // Verwende alternative Methode für iOS
+                    this.useAlternativeMethod();
+                    return false;
+                }
+
+                try {
+                    this.wakeLock = await navigator.wakeLock.request('screen');
+                    this.isActive = true;
+                    console.log('✅ Wake Lock aktiv');
+                    
+                    this.wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock freigegeben');
+                        this.wakeLock = null;
+                    });
+                    
+                    return true;
+                } catch (err) {
+                    console.error('Wake Lock error:', err);
+                    // Fallback für iOS
+                    this.useAlternativeMethod();
+                    return false;
+                }
+            }
+
+            // Alternative für iOS und ältere Browser
+            useAlternativeMethod() {
+                console.log('📱 Verwende Alternative zu Wake Lock...');
+                
+                // Spiele stummes Audio ab (hält iOS wach)
+                if (typeof Audio !== 'undefined') {
+                    try {
+                        const audio = new Audio();
+                        audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+                        audio.loop = true;
+                        audio.volume = 0.01; // Sehr leise
+                        audio.play().catch(e => console.log('Audio fallback failed:', e));
+                        this.audioElement = audio;
+                    } catch (e) {
+                        console.error('Audio fallback error:', e);
+                    }
+                }
+            }
+
+            async release() {
+                this.isActive = false;
+                
+                if (this.wakeLock) {
+                    try {
+                        await this.wakeLock.release();
+                        this.wakeLock = null;
+                    } catch (err) {
+                        console.error('Wake Lock release error:', err);
+                    }
+                }
+                
+                // Stoppe Audio-Fallback
+                if (this.audioElement) {
+                    try {
+                        this.audioElement.pause();
+                        this.audioElement = null;
+                    } catch (e) {
+                        console.error('Audio stop error:', e);
+                    }
+                }
+            }
+        }
+
+        // ============================================
+        // FIREBASE STORAGE (SECURE)
+        // ============================================
+        class TranscriptStorage {
+            constructor() {
+                this.collection = db ? db.collection('transcripts') : null;
+            }
+
+            async save(transcript) {
+                if (!this.collection) {
+                    throw new Error('Firebase nicht konfiguriert');
+                }
+
+                if (!auth || !auth.currentUser) {
+                    throw new Error('Nicht angemeldet');
+                }
+
+                try {
+                    const userId = auth.currentUser.uid;
+                    
+                    const doc = await this.collection
+                        .doc(userId)
+                        .collection('recordings')
+                        .add({
+                            text: transcript,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            wordCount: transcript.split(/\s+/).filter(w => w.length > 0).length,
+                            deviceInfo: navigator.userAgent
+                        });
+                    
+                    console.log('✅ Gespeichert:', doc.id);
+                    return doc.id;
+                } catch (error) {
+                    console.error('Speicherfehler:', error);
+                    throw error;
+                }
+            }
+        }
+
+        // ============================================
+        // MAIN APP CONTROLLER
+        // ============================================
+        class VoiceRecorderApp {
+            constructor() {
+                this.speechRecognition = new SpeechRecognitionManager();
+                this.wakeLock = new WakeLockManager();
+                this.storage = new TranscriptStorage();
+                this.timer = null;
+                this.startTime = null;
+                this.elapsedSeconds = 0;
+                
+                this.initElements();
+                this.initEventListeners();
+                this.checkAuthentication();
+            }
+
+            initElements() {
+                // Login
+                this.loginScreen = document.getElementById('loginScreen');
+                this.loginForm = document.getElementById('loginForm');
+                this.emailInput = document.getElementById('email');
+                this.passwordInput = document.getElementById('password');
+                this.loginBtn = document.getElementById('loginBtn');
+                this.loginError = document.getElementById('loginError');
+
+                // App
+                this.appScreen = document.getElementById('appScreen');
+                this.logoutBtn = document.getElementById('logoutBtn');
+                this.recordingControl = document.getElementById('recordingControl');
+                this.recordBtn = document.getElementById('recordBtn');
+                this.statusText = document.getElementById('statusText');
+                this.timerDisplay = document.getElementById('timer');
+                this.instructions = document.getElementById('instructions');
+                this.wakeLockAlert = document.getElementById('wakeLockAlert');
+
+                // Transcript
+                this.transcriptContent = document.getElementById('transcriptContent');
+                this.wordCount = document.getElementById('wordCount');
+                this.clearBtn = document.getElementById('clearBtn');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.copyBtn = document.getElementById('copyBtn');
+                this.saveBtn = document.getElementById('saveBtn');
+            }
+
+            initEventListeners() {
+                // Login
+                this.loginForm.addEventListener('submit', (e) => this.handleLogin(e));
+
+                // Logout
+                this.logoutBtn.addEventListener('click', () => this.handleLogout());
+
+                // Recording
+                this.recordBtn.addEventListener('click', () => this.toggleRecording());
+
+                // Actions
+                this.clearBtn.addEventListener('click', () => this.clearTranscript());
+                this.downloadBtn.addEventListener('click', () => this.downloadTranscript());
+                this.copyBtn.addEventListener('click', () => this.copyTranscript());
+                this.saveBtn.addEventListener('click', () => this.saveTranscript());
+
+                // Speech Recognition
+                this.speechRecognition.on('onFinalResult', (transcript) => {
+                    this.updateTranscript(transcript);
+                });
+
+                this.speechRecognition.on('onInterimResult', (interim) => {
+                    this.showInterimText(interim);
+                });
+
+                // Visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && this.speechRecognition.isRecording) {
+                        console.log('📱 Display aus - Aufnahme läuft weiter');
+                    }
+                });
+            }
+
+            // ========== AUTHENTICATION ==========
+            checkAuthentication() {
+                if (auth && auth.currentUser) {
+                    this.showApp();
+                } else {
+                    this.showLogin();
+                }
+
+                // Auth State Listener
+                if (auth) {
+                    auth.onAuthStateChanged((user) => {
+                        if (user) {
+                            console.log('✅ User logged in:', user.email);
+                        } else {
+                            console.log('❌ No user');
+                        }
+                    });
+                }
+            }
+
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                if (!auth) {
+                    this.showError('⚠️ Firebase nicht konfiguriert!\n\nBitte Firebase Config in der index.html eintragen (Zeile 917)');
+                    return;
+                }
+
+                const email = this.emailInput.value.trim();
+                const password = this.passwordInput.value;
+
+                // Validierung
+                if (!email || !email.includes('@')) {
+                    this.showError('❌ Bitte gültige E-Mail eingeben!');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    this.showError('❌ Passwort muss mindestens 6 Zeichen lang sein!');
+                    return;
+                }
+
+                this.loginBtn.disabled = true;
+                this.loginBtn.innerHTML = '<span class="loading"></span> Lädt...';
+
+                try {
+                    // Versuche Login
+                    try {
+                        const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                        console.log('✅ Login erfolgreich:', userCredential.user.email);
+                        this.showSuccess('✅ Erfolgreich eingeloggt!');
+                    } catch (loginError) {
+                        console.log('Login-Fehler:', loginError.code);
+                        
+                        // Falls Account nicht existiert, erstelle neuen
+                        if (loginError.code === 'auth/user-not-found') {
+                            console.log('📝 Erstelle neuen Account...');
+                            const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                            console.log('✅ Account erstellt:', userCredential.user.email);
+                            this.showSuccess('✅ Account erstellt und eingeloggt!');
+                        } 
+                        // Falsches Passwort
+                        else if (loginError.code === 'auth/wrong-password') {
+                            throw new Error('❌ Falsches Passwort!\n\nAccount existiert bereits mit anderem Passwort.');
+                        }
+                        // Andere Fehler
+                        else {
+                            throw loginError;
+                        }
+                    }
+
+                    this.loginError.classList.remove('show');
+                    
+                    // Warte kurz, dann zur App
+                    setTimeout(() => {
+                        this.showApp();
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('❌ Auth error:', error);
+                    
+                    let errorMsg = 'Anmeldung fehlgeschlagen!';
+                    
+                    // Spezifische Fehler
+                    if (error.code === 'auth/invalid-email') {
+                        errorMsg = '❌ Ungültige E-Mail Adresse!\n\nBeispiel: name@email.de';
+                    } 
+                    else if (error.code === 'auth/email-already-in-use') {
+                        errorMsg = '❌ E-Mail bereits vergeben!\n\nVerwende ein anderes Passwort zum Einloggen.';
+                    } 
+                    else if (error.code === 'auth/weak-password') {
+                        errorMsg = '❌ Passwort zu schwach!\n\nMindestens 6 Zeichen erforderlich.';
+                    } 
+                    else if (error.code === 'auth/wrong-password') {
+                        errorMsg = '❌ Falsches Passwort!\n\nAccount existiert bereits.';
+                    }
+                    else if (error.code === 'auth/network-request-failed') {
+                        errorMsg = '❌ Keine Internetverbindung!\n\nBitte Verbindung prüfen.';
+                    }
+                    else if (error.code === 'auth/too-many-requests') {
+                        errorMsg = '❌ Zu viele Versuche!\n\nBitte 5 Minuten warten.';
+                    }
+                    else if (error.code === 'auth/invalid-api-key') {
+                        errorMsg = '❌ Firebase nicht korrekt konfiguriert!\n\nBitte Firebase Config prüfen (apiKey).';
+                    }
+                    else if (error.code === 'auth/app-not-authorized') {
+                        errorMsg = '❌ App nicht autorisiert!\n\n1. Firebase Console öffnen\n2. Authentication aktivieren\n3. E-Mail/Passwort aktivieren';
+                    }
+                    else if (error.message) {
+                        errorMsg = '❌ Fehler: ' + error.message;
+                    }
+                    
+                    this.showError(errorMsg);
+                } finally {
+                    this.loginBtn.disabled = false;
+                    this.loginBtn.textContent = 'EINLOGGEN';
+                }
+            }
+
+            showError(message) {
+                this.loginError.textContent = message;
+                this.loginError.classList.add('show');
+                this.loginError.style.whiteSpace = 'pre-line'; // Für \n Zeilenumbrüche
+                setTimeout(() => {
+                    this.loginError.classList.remove('show');
+                }, 6000);
+            }
+
+            async handleLogout() {
+                if (this.speechRecognition.isRecording) {
+                    if (!confirm('⚠️ Aufnahme läuft noch! Wirklich abmelden?')) {
+                        return;
+                    }
+                    this.stopRecording();
+                }
+
+                try {
+                    if (auth) {
+                        await auth.signOut();
+                        console.log('✅ Logout erfolgreich');
+                    }
+                    this.showLogin();
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            }
+
+            showLogin() {
+                this.loginScreen.style.display = 'flex';
+                this.appScreen.classList.remove('active');
+                this.emailInput.value = '';
+                this.passwordInput.value = '';
+            }
+
+            showApp() {
+                this.loginScreen.style.display = 'none';
+                this.appScreen.classList.add('active');
+                
+                // Lade gespeichertes Transkript
+                this.loadFromLocalStorage();
+            }
+
+            // ========== RECORDING ==========
+            async toggleRecording() {
+                if (this.speechRecognition.isRecording) {
+                    this.stopRecording();
+                } else {
+                    this.startRecording();
+                }
+            }
+
+            async startRecording() {
+                const started = this.speechRecognition.start();
+                
+                if (!started) {
+                    alert('⚠️ Aufnahme fehlgeschlagen!\n\nBitte Mikrofon-Zugriff erlauben.');
+                    return;
+                }
+
+                // Wake Lock
+                const wakeLockActive = await this.wakeLock.request();
+                if (wakeLockActive) {
+                    this.wakeLockAlert.classList.add('active');
+                }
+
+                // UI
+                this.recordingControl.classList.add('recording');
+                this.recordBtn.textContent = '⏹';
+                this.statusText.textContent = 'AUFNAHME LÄUFT';
+                this.instructions.textContent = '✨ Display kann jetzt ausgeschaltet werden!';
+
+                // Timer
+                this.startTime = Date.now();
+                this.elapsedSeconds = 0;
+                this.timer = setInterval(() => this.updateTimer(), 1000);
+
+                console.log('🎙️ Aufnahme gestartet');
+            }
+
+            stopRecording() {
+                this.speechRecognition.stop();
+                this.wakeLock.release();
+
+                // UI
+                this.recordingControl.classList.remove('recording');
+                this.recordBtn.textContent = '●';
+                this.statusText.textContent = 'BEREIT';
+                this.instructions.textContent = 'Tippe auf den Button, um die Aufnahme zu starten';
+                this.wakeLockAlert.classList.remove('active');
+
+                // Timer
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+
+                // Final transcript
+                const finalTranscript = this.speechRecognition.getTranscript();
+                if (finalTranscript) {
+                    this.updateTranscript(finalTranscript);
+                }
+
+                console.log('⏹ Aufnahme beendet');
+            }
+
+            updateTimer() {
+                this.elapsedSeconds++;
+                const hours = Math.floor(this.elapsedSeconds / 3600);
+                const minutes = Math.floor((this.elapsedSeconds % 3600) / 60);
+                const seconds = this.elapsedSeconds % 60;
+
+                this.timerDisplay.textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+
+            // ========== TRANSCRIPT ==========
+            updateTranscript(text) {
+                if (!text) return;
+
+                this.transcriptContent.classList.remove('empty');
+                
+                // Formatiere Text (Groß-/Kleinschreibung & Satzzeichen)
+                const formattedText = this.speechRecognition.formatText(text);
+                this.transcriptContent.textContent = formattedText;
+                
+                // Word count
+                const words = formattedText.split(/\s+/).filter(w => w.length > 0);
+                this.wordCount.textContent = `${words.length} WÖRTER`;
+
+                // Enable buttons
+                this.clearBtn.disabled = false;
+                this.downloadBtn.disabled = false;
+                this.copyBtn.disabled = false;
+                this.saveBtn.disabled = false;
+
+                // Auto-scroll
+                this.transcriptContent.scrollTop = this.transcriptContent.scrollHeight;
+                
+                // Speichere in localStorage (Backup!)
+                this.saveToLocalStorage(formattedText);
+            }
+
+            showInterimText(interim) {
+                if (!interim) return;
+
+                const finalText = this.speechRecognition.finalTranscript;
+                const formattedFinal = this.speechRecognition.formatText(finalText);
+                
+                const interimSpan = document.createElement('span');
+                interimSpan.className = 'interim-text';
+                interimSpan.textContent = interim;
+                
+                this.transcriptContent.textContent = formattedFinal;
+                this.transcriptContent.appendChild(document.createTextNode(' '));
+                this.transcriptContent.appendChild(interimSpan);
+                
+                this.transcriptContent.scrollTop = this.transcriptContent.scrollHeight;
+            }
+
+            clearTranscript() {
+                if (!confirm('⚠️ Transkript löschen?')) return;
+
+                this.speechRecognition.clearTranscript();
+                this.transcriptContent.textContent = 'Dein gesprochener Text erscheint hier in Echtzeit...';
+                this.transcriptContent.classList.add('empty');
+                this.wordCount.textContent = '0 WÖRTER';
+                this.elapsedSeconds = 0;
+                this.timerDisplay.textContent = '00:00:00';
+
+                this.clearBtn.disabled = true;
+                this.downloadBtn.disabled = true;
+                this.copyBtn.disabled = true;
+                this.saveBtn.disabled = true;
+                
+                // Lösche aus localStorage
+                this.clearLocalStorage();
+            }
+
+            // LocalStorage Funktionen
+            saveToLocalStorage(text) {
+                try {
+                    localStorage.setItem('currentTranscript', text);
+                    localStorage.setItem('transcriptTimestamp', Date.now().toString());
+                } catch (e) {
+                    console.error('localStorage save error:', e);
+                }
+            }
+
+            loadFromLocalStorage() {
+                try {
+                    const savedText = localStorage.getItem('currentTranscript');
+                    const timestamp = localStorage.getItem('transcriptTimestamp');
+                    
+                    if (savedText && timestamp) {
+                        // Nur laden wenn weniger als 24 Stunden alt
+                        const age = Date.now() - parseInt(timestamp);
+                        const maxAge = 24 * 60 * 60 * 1000; // 24 Stunden
+                        
+                        if (age < maxAge) {
+                            console.log('📥 Lade gespeichertes Transkript...');
+                            this.speechRecognition.finalTranscript = savedText;
+                            this.updateTranscript(savedText);
+                            return true;
+                        } else {
+                            // Zu alt, lösche
+                            this.clearLocalStorage();
+                        }
+                    }
+                } catch (e) {
+                    console.error('localStorage load error:', e);
+                }
+                return false;
+            }
+
+            clearLocalStorage() {
+                try {
+                    localStorage.removeItem('currentTranscript');
+                    localStorage.removeItem('transcriptTimestamp');
+                } catch (e) {
+                    console.error('localStorage clear error:', e);
+                }
+            }
+
+            downloadTranscript() {
+                let text = this.speechRecognition.getTranscript();
+                if (!text) {
+                    alert('⚠️ Kein Text vorhanden!');
+                    return;
+                }
+
+                // Formatiere Text
+                text = this.speechRecognition.formatText(text);
+
+                try {
+                    const now = new Date();
+                    const date = now.toISOString().split('T')[0];
+                    const time = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+                    const filename = `Transkript_${date}_${time}.txt`;
+
+                    // BOM für UTF-8
+                    const BOM = '\uFEFF';
+                    const blob = new Blob([BOM + text], { type: 'text/plain;charset=utf-8' });
+                    
+                    // iOS/Safari support
+                    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                        window.navigator.msSaveOrOpenBlob(blob, filename);
+                    } else {
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = filename;
+                        
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        }, 100);
+                    }
+
+                    this.showSuccess('✅ Download gestartet!');
+                    console.log('📥 Download:', filename);
+                } catch (error) {
+                    console.error('Download error:', error);
+                    alert('❌ Download fehlgeschlagen: ' + error.message);
+                }
+            }
+
+            async copyTranscript() {
+                let text = this.speechRecognition.getTranscript();
+                if (!text) {
+                    alert('⚠️ Kein Text vorhanden!');
+                    return;
+                }
+
+                // Formatiere Text
+                text = this.speechRecognition.formatText(text);
+
+                try {
+                    // Moderne Clipboard API
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        await navigator.clipboard.writeText(text);
+                    } else {
+                        // Fallback für ältere Browser/iOS
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        textArea.style.top = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        
+                        const successful = document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        
+                        if (!successful) {
+                            throw new Error('Kopieren fehlgeschlagen');
+                        }
+                    }
+                    
+                    const originalText = this.copyBtn.innerHTML;
+                    this.copyBtn.innerHTML = '✅ Kopiert!';
+                    this.showSuccess('✅ Text kopiert!');
+                    
+                    setTimeout(() => {
+                        this.copyBtn.innerHTML = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Copy error:', err);
+                    alert('❌ Kopieren fehlgeschlagen: ' + err.message);
+                }
+            }
+
+            async saveTranscript() {
+                let text = this.speechRecognition.getTranscript();
+                if (!text) {
+                    alert('⚠️ Kein Text vorhanden!');
+                    return;
+                }
+
+                // Formatiere Text
+                text = this.speechRecognition.formatText(text);
+
+                try {
+                    this.saveBtn.innerHTML = '<span class="loading"></span> Speichere...';
+                    this.saveBtn.disabled = true;
+
+                    const docId = await this.storage.save(text);
+                    
+                    this.saveBtn.innerHTML = '✅ Gespeichert!';
+                    this.showSuccess('✅ In Firebase gespeichert!');
+                    
+                    setTimeout(() => {
+                        this.saveBtn.innerHTML = '💾 Speichern';
+                        this.saveBtn.disabled = false;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Save error:', err);
+                    alert('❌ Speichern fehlgeschlagen: ' + err.message);
+                    this.saveBtn.innerHTML = '💾 Speichern';
+                    this.saveBtn.disabled = false;
+                }
+            }
+
+            showSuccess(message) {
+                const feedback = document.createElement('div');
+                feedback.className = 'success-feedback';
+                feedback.textContent = message;
+                document.body.appendChild(feedback);
+
+                setTimeout(() => {
+                    feedback.remove();
+                }, 3000);
+            }
+        }
+
+        // ============================================
+        // APP INITIALIZATION
+        // ============================================
+        let app;
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            app = new VoiceRecorderApp();
+            console.log('✅ Voice Recorder Pro loaded');
+        });
+
+        // Prevent accidental refresh
+        window.addEventListener('beforeunload', (e) => {
+            if (app && app.speechRecognition.isRecording) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        });
+    </script>
+</body>
+</html>
